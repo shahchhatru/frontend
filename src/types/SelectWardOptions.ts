@@ -58,4 +58,4 @@ const wardrolesoption:Option[]=[
     
 ]
 
-export { options }
+export { options, municipalrolesOptions,wardrolesoption }

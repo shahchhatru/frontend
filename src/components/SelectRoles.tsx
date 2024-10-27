@@ -2,11 +2,12 @@ import Select from 'react-select';
 import { Option } from '@/types/SelectWardOptions';
 import { useState } from 'react';
 
+
 interface SelectWardsProps {
   options: Option[];
 }
 
-const SelectWards = ({ options }: SelectWardsProps) => {  
+const SelectRoles = ({ options }: SelectWardsProps) => {  
   const [value, setValue] = useState<Option | null>(null);
 
   const handleChange = (selectedOption: Option | null) => {
@@ -27,4 +28,4 @@ const SelectWards = ({ options }: SelectWardsProps) => {
   );
 }
 
-export default SelectWards;
+export default SelectRoles;

@@ -1,7 +1,8 @@
+import SelectRoles from "./SelectRoles";
 import SelectWards from "./SelectWards";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { options } from "@/types/SelectWardOptions";
+import { options,municipalrolesOptions,wardrolesoption } from "@/types/SelectWardOptions";
 
 
 const AddUserForm = ()=>{
@@ -19,6 +20,10 @@ const AddUserForm = ()=>{
             <div className="flex flex-col items-start">
             <Label className="text-left w-full mb-2 p-2 text-light capitalize">Ward No</Label>
             <SelectWards options={options} />
+            </div>
+            <div className="flex flex-col items-start">
+            <Label className="text-left w-full mb-2 p-2 text-light capitalize">Roles</Label>
+            <SelectRoles options={false?municipalrolesOptions:wardrolesoption} />
             </div>
         </div>
     )
