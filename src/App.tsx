@@ -1,14 +1,17 @@
 import './App.css'
+import { Login } from './components'
+import { Toaster } from "@/components/ui/sonner"
 
 function App() {
   
   return (
     <>
-     <h1 className="text-3xl font-bold underline text-red-500     ">
-      Hello world!
-    </h1>
+    <div className='w-full flex justify-center items-center h-[90vh] p-0 m-0'>
+    <Login />
+    </div>
+    <Toaster richColors />
     </>
-  )
+  ) 
 }
 
 export default App
