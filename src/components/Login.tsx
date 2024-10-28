@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../store/AuthSlice'; 
 import { Loader } from 'semantic-ui-react';
@@ -18,11 +18,11 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const resultAction = await dispatch(login({ email, password ,municipalityCode})); 
+      const resultAction = await dispatch(login({ email, password, municipalityCode })); 
       unwrapResult(resultAction);
       toast.success('Login successful');
     } catch (err: any) {
-    
+      // Handle error display or logging if necessary
     }
   };
 
@@ -66,6 +66,9 @@ const Login = () => {
           required
           className="p-2 border border-gray-300 rounded" 
         />
+        {error?.fieldErrors?.municipalityCode && (
+          <div className="error-message">{error.fieldErrors.municipalityCode}</div>
+        )}
       </div>
       <div className="login-button">
         <button

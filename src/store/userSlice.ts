@@ -3,41 +3,34 @@ import apiClient from "@/config/axios";
 import { toast } from "sonner";
 import { StoreState, User } from "../types/StoreTypes";
 
-export const addUser = createAsyncThunk<User, { username: string; password: string; email: string; role: string; municipalityCode: string }, { state: StoreState }>(
+export const addUser = createAsyncThunk<User, FormData, { state: StoreState }>(
   'users/addUser',
-  async (userData, { getState, rejectWithValue }) => {
+  async (payload, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-      const token = state.user.token; // Get the token from the state
+      const token = state.user.token; 
 
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`, // Set the Authorization header
+          Authorization: `Bearer ${token}`, 
         },
       };
 
-      const response = await apiClient.post('/users/add', userData, config); // Adjust the URL as needed
-      const { data } = response;
+      const { data } = await apiClient.post(`/users`, payload, config);
 
       if (data.success) {
-        toast.success(data.message); // Show success message
-        return data.data.user; // Return the added user data
+        toast.success(data.message);
+        return data.data.user; 
       } else {
         return rejectWithValue(data.message || 'Failed to add user');
       }
-    } catch (error: any) {
-      const message = error?.response?.data?.message || 'An error occurred';
-      toast.error(message); // Show error message
-      return rejectWithValue({
-        message: message,
-        fieldErrors: error.response?.data?.fieldErrors || {}, // Ensure your API returns these
-      });
+    } catch (e: any) {
+      const message = e?.response?.data?.error?.message || 'An error occurred';
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
-
-
-
 const initialState = {
   users: [] as User[], 
   loading: false, 

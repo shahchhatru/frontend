@@ -13,10 +13,8 @@ const loginSchema = z.object({
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(
-      /[@$!%*?&#]/,
-      "Password must contain at least one special character"
-    ),
+    .regex(/[@$!%*?&#]/, "Password must contain at least one special character"),
+  municipalityCode: z.string().min(1, "Municipality code is required"),
 });
 
 interface User {
@@ -34,13 +32,32 @@ interface AuthState {
   user: User | null;
   error: {
     message?: string;
-    fieldErrors?: { email?: string; password?: string };
+    fieldErrors?: { email?: string; password?: string; municipalityCode?: string };
   } | null;
   email: string;
   password: string;
+  municipalityCode: string;
 }
 
 const AUTH_STATE_KEY = "authState";
+
+// Helper function for error messages
+const handleError = (error: any) => {
+  if (error instanceof z.ZodError) {
+    const fieldErrors = error.flatten().fieldErrors;
+    return {
+      message: "Validation failed",
+      fieldErrors: {
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+        municipalityCode: fieldErrors.municipalityCode?.[0],
+      },
+    };
+  }
+  return {
+    message: error.response?.data?.message || "An error occurred during login",
+  };
+};
 
 const getInitialAuthState = (): AuthState => {
   const savedAuthState = localStorage.getItem(AUTH_STATE_KEY);
@@ -55,6 +72,7 @@ const getInitialAuthState = (): AuthState => {
     error: null,
     email: "",
     password: "",
+    municipalityCode: "",
   };
 };
 
@@ -63,28 +81,17 @@ const initialState: AuthState = getInitialAuthState();
 export const login = createAsyncThunk(
   "auth/login",
   async (
-    { email, password }: { email: string; password: string },
+    { email, password, municipalityCode }: { email: string; password: string; municipalityCode: string },
     { rejectWithValue }
   ) => {
     try {
-      loginSchema.parse({ email, password });
-      const response = await apiClient.post("/auth/login", { email, password, });
+      loginSchema.parse({ email, password, municipalityCode });
+      const response = await apiClient.post("/auth/login", { email, password, municipality_code: municipalityCode });
       const { accessToken, refreshToken } = response.data.data;
       const decodedToken: User = jwtDecode(accessToken);
       return { accessToken, refreshToken, user: decodedToken };
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.flatten().fieldErrors;
-        return rejectWithValue({
-          fieldErrors: {
-            email: fieldErrors.email?.[0],
-            password: fieldErrors.password?.[0],
-          },
-        });
-      }
-      return rejectWithValue({
-        message: error.response?.data?.message || "Login failed",
-      });
+      return rejectWithValue(handleError(error));
     }
   }
 );

@@ -4,12 +4,15 @@ import { Label } from './ui/label';
 import { options, wardrolesoption } from '@/types/SelectWardOptions';
 import { addUser } from '../store/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'sonner';
 import { unwrapResult } from '@reduxjs/toolkit';
-
+import { AppDispatch } from '../store/store';
+import { toast } from 'sonner';
 
 const AddUserForm: React.FC = () => {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
+    const error = useSelector((state: any) => state.user.error);
+    const fieldErrors = useSelector((state: any) => state.user.fieldErrors);
+
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -39,16 +42,15 @@ const AddUserForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const { username, email, selectedWard, role } = formData; 
+        const { username, email, selectedWard, role } = formData;
         try {
-         
             const resultAction = await dispatch(addUser({ username, email, selectedWard, role }));
-            unwrapResult(resultAction); 
-            toast.success('User added successfully');
-           
+            unwrapResult(resultAction);
             setFormData({ username: '', email: '', selectedWard: '', role: '' });
+            toast.success('User added successfully!'); // Show success message
         } catch (err: any) {
-            toast.error('Failed to add user: ' + (err.message || 'Unknown error occurred.'));
+            // Error handling is done in the slice
+            toast.error(err.message || 'Failed to add user'); // Show error message
         }
     };
 
@@ -63,6 +65,7 @@ const AddUserForm: React.FC = () => {
                     onChange={handleChange}
                     required
                 />
+                {fieldErrors.username && <div className="error-message">{fieldErrors.username}</div>}
             </div>
             <div className="flex flex-col items-start">
                 <Label className="text-left w-full mb-2 p-2 text-light capitalize">Email</Label>
@@ -74,6 +77,7 @@ const AddUserForm: React.FC = () => {
                     onChange={handleChange}
                     required
                 />
+                {fieldErrors.email && <div className="error-message">{fieldErrors.email}</div>}
             </div>
             <div className="flex flex-col items-start">
                 <Label className="text-left w-full mb-2 p-2 text-light capitalize">Ward No</Label>
@@ -100,14 +104,19 @@ const AddUserForm: React.FC = () => {
                     required
                 >
                     <option value="" disabled>Select a role</option>
-                    {roles.map((roleOption) => (
-                        <option key={roleOption.value} value={roleOption.value}>
-                            {roleOption.label}
+                    {roles.map((role) => (
+                        <option key={role.value} value={role.value}>
+                            {role.label}
                         </option>
                     ))}
                 </select>
             </div>
-            <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Add User</button>
+            <div className="flex justify-center mt-4 mb-4">
+                <button type="submit" className="btn btn-primary">
+                    Add User
+                </button>
+                {error && <div className="error-message">{error.message}</div>} {/* Show general error if exists */}
+            </div>
         </form>
     );
 };
